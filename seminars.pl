@@ -16,9 +16,6 @@ removeAll(_,[],[]).
 removeAll(X,[X|L],R) :- removeAll(X,L,R).
 removeAll(X,[Y|L],[Y|R]) :- X \= Y, removeAll(X,L,R).
 
-len([],0).
-len([_|L], N) :- len(L,N1), N is N1 + 1.
-
 min(A,B,A) :- A =< B.
 min(A,B,B) :- A > B.
 
@@ -93,7 +90,6 @@ gen_MN_list(N,M,[H|L]) :-
     N1 is N - 1,
     between(0,M,H),
     M1 is M - H,
-
     gen_MN_list(N1,M1,L).
 
 %предикат, който разпознава дали елементите на списъка L са строго растящи
@@ -159,6 +155,9 @@ cartesian([A|T],L,R) :-
     makePair(A,L,S), 
     append(S,R1,R).
 
+cartesian_tuples([],[]).
+cartesian_tuples([H|T], [B|R]) :- member(B, H), cartesian_tuples(T,R).
+
 gen_relations2(R) :- 
     gen_pair(A,B),
     gen_ones_pos(A,0,AL),
@@ -211,6 +210,18 @@ gen_wordN(N,L,[A|T]) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%% Работа с множества/списъци  %%%%%%%%%%%%%%%%%%
+len([],0).
+len([_|L], N) :- len(L,N1), N is N1 + 1.
+
+% ВАЖНО!!! каква е разликата между nth_element_SINGLE_PURPOSE и nth_element:
+% nth_element_SINGLE_PURPOSE не може да се използва по следния начин
+% nth_element_SINGLE_PURPOSE([0,1,2,3,4,5], X, 2). т.е не може да зададем въпроса на коя
+% позиция стои първото срешане на елемента 2.
+nth_element_SINGLE_PURPOSE([X|_], 0, X).
+nth_element_SINGLE_PURPOSE([_|L], N, X) :- N1 is N - 1, nth_element_SINGLE_PURPOS(L, N1, X).
+
+nth_element([X|_], 0, X).
+nth_element([_|L], N, X) :- nth_element(L, N1, X), N is N1 + 1.
 
 %предикат който от списъка L създава нов списък R, такъв че има само уникални елементи от L
 unique([],[]).
@@ -255,6 +266,12 @@ union([A|L], R) :-
     union(L,U),
     setDifference2(A,U,S),
     append(S,U,R).
+
+in_union(X,A,B) :- member(X,A); member(X,B).
+in_intersection(X,A,B) :- member(X,A), member(X,B).
+in_differencr(X,A,B) :- member(X,A), not(member(X,B)).
+is_subset_of(A,B) :- not(( member(X,A), not(member(X,B)) )).
+set_equal(A,B) :- is_subset_of(A,B), is_subset_of(B,A).
 
 %генерира в X всички подмножества на Y
 subset(X,Y) :- setDifference(Y,[],X).
